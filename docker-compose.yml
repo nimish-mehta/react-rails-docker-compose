@@ -1,0 +1,32 @@
+version: '3'
+services:
+  backend:
+    build : ./backend
+    depends_on:
+      - postgres
+    entrypoint: 'bundle exec puma -C config/puma.rb'
+    volumes:
+      - ./backend:/home/app/backend
+  frontend:
+    build: ./frontend
+    volumes:
+      - ./frontend/frontend/src:/home/app/frontend/src
+      - ./frontend/frontend/public:/home/app/frontend/public
+  server:
+    build: ./nginx
+    depends_on:
+      - frontend
+      - backend
+    ports:
+      - "80:80"
+  postgres:
+    image: postgres:9.5.3
+    environment:
+      - POSTGRES_PASSWORD=mysecretpassword
+      - POSTGRES_USER=backend
+      - POSTGRES_DB=backend_development
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+volumes:
+  postgres_data:
+    driver: local
